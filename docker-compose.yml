@@ -1,0 +1,56 @@
+version: '3.8'
+services:
+  mongodb:
+    container_name: anomolymongodb
+    image: mongo:latest
+    restart: always 
+    environment: 
+      - MONGO_INITDB_ROOT_USERNAME=root       ## change this to your username
+      - MONGO_INITDB_ROOT_PASSWORD=example    ## change this to your password
+      - MONGO_INITDB_DATABASE=anomoly         ## Do not change this
+    volumes: 
+      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - my_data:/data/db 
+    ports:
+      - "27017:27017"
+    networks:
+      - anomoly-network
+
+  anomolyserver:
+    container_name: anomolyserver
+    restart: always 
+    build: 
+      context: ./AnomolyServer
+      dockerfile: Dockerfile
+    depends_on: 
+      - mongodb
+    volumes: 
+      - /app/node_modules
+      - ./AnomolyServer:/app 
+    ports: 
+      - "4000:4000"
+    networks:
+      - anomoly-network
+
+  Caddy:
+    container_name: Caddy
+    image: caddy:2.4.3-alpine
+    restart: always
+    depends_on: 
+    - mongodb
+    volumes:
+      - ./Caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - anomoly-network
+  
+volumes: 
+  my_data: 
+  caddy_data:
+
+networks:
+  anomoly-network:
+    driver: bridge

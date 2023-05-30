@@ -1,0 +1,3 @@
+graphql.anomoly.cloud  {
+  reverse_proxy /graphql anomolyserver:4000
+}
