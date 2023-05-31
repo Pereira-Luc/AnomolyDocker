@@ -43,9 +43,15 @@ fi
 
 printf "Preparing the build environment for the project\n"
 
-
 # Clone the required repositories for the project
 git clone https://github.com/Pereira-Luc/AnomolyServer
+
+# Ask the user for a Secret key for the project
+read -p "Please enter a secret key for the project: " secret_key
+echo
+
+# Modify the .env file for the project
+sed -i "s/APP_SECRET=.*/APP_SECRET=\""$secret_key"\"/g" AnomolyServer/.env
 
 # Run docker-compose to build the project
 docker-compose up -d --build
